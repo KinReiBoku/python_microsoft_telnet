@@ -1,7 +1,7 @@
 import os
 import telnetlib
- 
-HOST = "192.168.43.40"
+
+HOST = "localhost"
 USER = "default"
 PASS = "password"
 
@@ -11,6 +11,8 @@ class telnet_host:
 		self.host = host
 		self.port = port
 		self.conn = None
+		print host
+		print port
 
 	def open(self, user, password):
 		self.conn = telnetlib.Telnet(self.host, self.port)
@@ -26,17 +28,29 @@ class telnet_host:
 		self.conn.close()
 
 	def write(self, buf, sign):
+		self.conn.get_socket().send("Clear-Host\r\n")
+		self.conn.read_until('>')
 		self.conn.get_socket().send(buf)
 		self.conn.read_until(sign)
+		self.conn.get_socket().send("echo $?\r\n")
+		result = self.conn.expect(["True", "False"])
+		result1 = result[2].decode('cp932').encode('utf-8')
+		r = re.compile(r'\x1b\[.*?m\[?')
+		result2 = re.sub(r,'',result1)
+		return [result[0], result2]
 
 	def read(self, buf):
 		self.conn.read_until(buf)
 
 	def set_option(self, sock, cmd, opt):
 		if opt == telnetlib.TTYPE and cmd in (telnetlib.DO):
-			self.sock.sendall(telnetlib.IAC + telnetlib.WILL + telnetlib.TTYPE)
-		elif opt == telnetlib.TTYPE and cmd in (telnetlib.SB):
-			self.sock.sendall(telnetlib.IAC + telnetlib.SB + telnetlib.TTYPE + chr(0) +  'vt100' + telnetlib.IAC  + telnetlib.SE)
+			sock.sendall(telnetlib.IAC + telnetlib.WILL + telnetlib.TTYPE)
+			sock.sendall(telnetlib.IAC + telnetlib.SB + telnetlib.TTYPE + chr(0) +  'vt100' + telnetlib.IAC  + telnetlib.SE)
+		elif opt != telnetlib.NOOPT:
+			if cmd in (telnetlib.DO, telnetlib.DONT):
+				sock.sendall(telnetlib.IAC + telnetlib.WONT + opt)
+			elif cmd in (telnetlib.WILL, telnetlib.WONT):
+				sock.sendall(telnetlib.IAC + telnetlib.DONT + opt)
 
 if __name__ == '__main__':
 
