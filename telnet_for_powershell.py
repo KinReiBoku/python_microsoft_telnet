@@ -53,7 +53,10 @@ class telnet_host:
 			for cmd in [buf, command]:
 				esp_tuple = ("\\", ".", "^", "$", "*", "+", "?", "{", "[", "]", "|", "(", ")")
 				for esp in esp_tuple:
-					cmd = re.sub('\\'+esp, '\\'+esp, cmd)
+				if esp == "\\":
+					cmd = re.sub('\\'+esp,'\\\\\\'+esp,cmd)
+				else:
+					cmd = re.sub('\\'+esp,'\\'+esp,cmd)
 				result = re.sub(cmd, '', result)
 			# ƒvƒƒ“ƒvƒg‚Ìœ‹
 			result = re.sub(r'PS .*>', '', result)
