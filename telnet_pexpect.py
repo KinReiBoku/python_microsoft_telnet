@@ -1,5 +1,4 @@
-# coding:utf-8
-
+# -*- coding: utf-8 -*-
 from pexpect import spawn
 
 # 接続情報
