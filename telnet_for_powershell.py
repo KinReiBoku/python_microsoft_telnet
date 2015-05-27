@@ -59,7 +59,7 @@ class telnet_host:
 					cmd = re.sub('\\'+esp,'\\'+esp,cmd)
 				result = re.sub(cmd, '', result)
 			# プロンプトの除去
-			result = re.sub(r'PS .*>', '', result)
+			result = re.sub(r'PS .*?>', '', result)
 			# echo $?実行結果の除去
 			result = result.strip('True')
 			result = result.strip('False')
